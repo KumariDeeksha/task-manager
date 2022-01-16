@@ -1,62 +1,96 @@
 //CRUD operations
 
-const mongodb= require('mongodb')
-const MongoClient = mongodb.MongoClient
+// const mongodb= require('mongodb')
+// const MongoClient = mongodb.MongoClient
+// const ObjectID = mongodb.ObjectID
 
-const connectionURL='mongodb://127.0.0.1:27017'
-const databaseName='taskmanage'
+const { MongoClient, ObjectID } = require('mongodb')
 
-MongoClient.connect(connectionURL,{useNewUrlParser:true},(error,client)=>{
- if(error){
-     return console.log("Unable to connect to database!")
- }
-  const db =client.db(databaseName)
-  db.collection('users').insertOne({
-      name: 'Deeksha',
-      age: 21
-  },(error,result) =>{
-    if(error){
-    return console.log('unable to insert user')}
-    console.log(result.ops)
-    // ops is an array of documents
-  })
-    db.collection('users').insertMany([
-      {
-          name:'jen',
-          age:34
-    },
+const connectionURL = 'mongodb://127.0.0.1:27017'
+const databaseName = 'taskmanage'
+
+// const id = new ObjectID()
+// console.log(id.id.length)
+// console.log(id.toHexString().length)
+// console.log(id.getTimestamp())
+
+MongoClient.connect(connectionURL, { useNewUrlParser: true }, (error, client) => {
+  if (error) {
+    return console.log("Unable to connect to database!")
+  }
+  const db = client.db(databaseName)
+
+  // db.collection('users').findOne({_id:new ObjectID("61e18e5830cf074a941f6866")},(error,user)=>{
+  //   if (error){
+  //     return console.log('unable to fetch')
+  //   }
+  //   console.log(user)
+  // })
+
+  // db.collection('users').find({ age:21 }).toArray((error,users)=>{
+  //   console.log(users)
+  // })
+  // db.collection('users').find({ age:21 }).count((error,count)=>{
+  //   console.log(count)
+  // })
+
+
+  // // #challenge-2
+  // db.collection('tasks').findOne({_id:new ObjectID('61e267c829cc973570728d64')},(error,task)=>{
+  //       console.log(task)
+  // })
+
+
+  // ----------------------------------------------------------------------------------------------------------
+
+  const updatePromise = db.collection('users').updateOne({
+    _id: new ObjectID("61e18ede048f6236388fd48a")
+  },
     {
-      name:'harry',
-      age:32
-    }, (error,result)=>{
-       if(error){
-        return console.log('unable to insert user')}
-        
-       
-       console.log(result.ops)
-    }
-  ])
+      $set: {
+        name: 'Andrew',
+
+      },
+      $inc: {
+        age: 1
+      }
+    })
+  updatePromise.then((result) => {
+    console.log(result)
+  }).catch((error) => {
+    console.log(error)
+  })
 
 
-// #challenge
- db.collection('tasks').insertMany([
-   {
-     description:'clean the house',
-     completed: true
-   },
-   {
-    description:'renew inspection',
+  db.collection('tasks').updateMany({
     completed: false
-   },
-   {
-    description:'take care of pots',
-    completed: true
-   } 
-  ],(error,result)=>{
-        if(error){
-        return console.log('unable to insert document!')
-   }
-   console.log(result.ops)
+  }, {
+    $set: {
+      completed: true
+    }
+  }).then((result) => {
+    console.log(result.modifiedCount)
+  }).catch((error) => {
+    console.log(error)
+  })
+
+
+  // ------------delete documents---------------------
+
+  db.collection('users').deleteMany({
+    age: 21
+  }).then((result) => {
+    console.log(result)
+  }).catch((error) => {
+    console.log(error)
+  })
+
+
+  db.collection('tasks').deleteOne({
+    description:'renew inspection'
+  }).then((result)=>{
+    console.log(result)
+  }).catch((error)=>{
+    console.log(error)
   })
 })
-
